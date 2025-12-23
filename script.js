@@ -632,6 +632,8 @@ function formatarTelefone(numero, codigoPais = '55', ddd = null) {
             numLimpo = numLimpo.substring(dddLimpo.length);
         }
         // Se o número não tem DDD, adiciona o DDD inferido
+        // A lógica de formatação abaixo (linhas 641+) irá lidar com a adição do '9'
+        // para números de 10 dígitos (DDD + 8 dígitos).
         if (numLimpo.length === 8 || numLimpo.length === 9) {
             numLimpo = dddLimpo + numLimpo;
         }
@@ -640,12 +642,22 @@ function formatarTelefone(numero, codigoPais = '55', ddd = null) {
     // Tenta formatar o número
     if (numLimpo.length === 11) { // (XX) 9XXXX-XXXX (com 9º dígito)
         return `(${numLimpo.substring(0, 2)}) ${numLimpo.substring(2, 7)}-${numLimpo.substring(7)}`;
-    } else if (numLimpo.length === 10) { // (XX) XXXX-XXXX (sem 9º dígito)
-        return `(${numLimpo.substring(0, 2)}) ${numLimpo.substring(2, 6)}-${numLimpo.substring(6)}`;
+    } else if (numLimpo.length === 10) { // (XX) XXXX-XXXX (sem 9º dígito) -> Adiciona o 9º dígito
+        // O usuário quer o '9' após o DDD. Se o número tem 10 dígitos (DDD + 8 dígitos),
+        // assumimos que é um telefone fixo ou um celular antigo e adicionamos o '9'
+        // para transformá-lo em um número de 11 dígitos (DDD + 9 dígitos).
+        const ddd = numLimpo.substring(0, 2);
+        const numeroSemDDD = numLimpo.substring(2);
+        const novoNumero = `${ddd}9${numeroSemDDD}`; // Adiciona o '9' após o DDD
+        
+        // Formata o novo número de 11 dígitos
+        return `(${novoNumero.substring(0, 2)}) ${novoNumero.substring(2, 7)}-${novoNumero.substring(7)}`;
     } else if (numLimpo.length === 9) { // 9XXXX-XXXX (sem DDD)
         return `${numLimpo.substring(0, 5)}-${numLimpo.substring(5)}`;
-    } else if (numLimpo.length === 8) { // XXXX-XXXX (sem DDD e sem 9º dígito)
-        return `${numLimpo.substring(0, 4)}-${numLimpo.substring(4)}`;
+    } else if (numLimpo.length === 8) { // XXXX-XXXX (sem DDD e sem 9º dígito) -> Adiciona o 9º dígito
+        // Se o número tem 8 dígitos e não tem DDD, adicionamos o '9' na frente
+        const novoNumero = `9${numLimpo}`;
+        return `${novoNumero.substring(0, 5)}-${novoNumero.substring(5)}`;
     }
 
     return numero; // Retorna o original se não conseguir formatar
