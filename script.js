@@ -212,7 +212,7 @@ function exportManychatContacts() {
     // custom_field_CNPJ: Campo personalizado para o CNPJ
     // custom_field_EMAIL: Campo personalizado para o Email
     // custom_field_DATA_ABERTURA: Campo personalizado para a Data de Abertura
-    const header = ['Whatsapp Id', 'Razão Social'].join(',');
+    const header = ['Whatsapp ID', 'First Name', 'Razão Social'].join(',');
 
     // 1. FILTRAGEM: Aplica o filtro de Razão Social solicitado pelo usuário
     const filteredResults = allResults.filter(empresa => {
@@ -250,8 +250,8 @@ function exportManychatContacts() {
 // Usa aspas duplas para encapsular campos que podem conter vírgulas (Razão Social)
 	        return [
 	            `"${telefoneRaw}"`, // Telefone no formato internacional (agora 'Whatsapp Id')
-`"${razaoSocial}"`, // Razão Social completa
-		            // Frase padrão removida
+`"${firstName}"`, // Primeira palavra da Razão Social como First Name
+			            `"${razaoSocial.replace(/"/g, '""')}"`, // Razão Social completa
 		        ].join(',');
     }).filter(line => line !== null); // Remove os registros ignorados
 
