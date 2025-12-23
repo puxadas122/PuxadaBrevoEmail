@@ -57,7 +57,7 @@ async function handleSearch(e) {
             'founded.gte': dataInicioISO,
             'founded.lte': dataFimISO,
             'company.simei.optant.eq': 'true', // Filtro MEI reativado
-            'limit': '60' // Aumentado o limite para buscar mais resultados
+            'limit': '5' // Aumentado o limite para buscar mais resultados
         });
 
         const url = `${API_BASE_URL}?${params.toString()}`;
@@ -199,6 +199,23 @@ function extractEmail(empresa) {
     return email;
 }
 
+// NOVO: Função para formatar o CNPJ como XX.XXX.XXX/XXXX-XX
+function formatarCNPJ(cnpj) {
+    // Remove tudo que não for dígito
+    const cleanCnpj = cnpj.replace(/[^\d]/g, '');
+
+    // Verifica se tem 14 dígitos
+    if (cleanCnpj.length !== 14) {
+        return cnpj; // Retorna o original se não tiver 14 dígitos
+    }
+
+    // Aplica a máscara: XX.XXX.XXX/XXXX-XX
+    return cleanCnpj.replace(
+        /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+        '$1.$2.$3/$4-$5'
+    );
+}
+
 // NOVO: Função para exportar contatos formatados para Manychat
 function exportManychatContacts() {
     if (allResults.length === 0) {
@@ -251,8 +268,8 @@ function exportManychatContacts() {
 	        return [
 	            `"${telefoneRaw}"`, // Telefone no formato internacional (agora 'Whatsapp Id')
 `"${firstName}"`, // Primeira palavra da Razão Social como First Name
-			            `"${razaoSocial.replace(/"/g, '""')}"`, // Razão Social completa
-			            `"${cnpj}"`, // CNPJ
+				            `"${razaoSocial.replace(/"/g, '""')}"`, // Razão Social completa
+			            `"${formatarCNPJ(cnpj)}"`, // CNPJ formatado
 		        ].join(',');
     }).filter(line => line !== null); // Remove os registros ignorados
 
