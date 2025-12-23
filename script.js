@@ -57,7 +57,7 @@ async function handleSearch(e) {
             'founded.gte': dataInicioISO,
             'founded.lte': dataFimISO,
             'company.simei.optant.eq': 'true', // Filtro MEI reativado
-            'limit': '5' // Aumentado o limite para buscar mais resultados
+            'limit': '40' // Aumentado o limite para buscar mais resultados
         });
 
         const url = `${API_BASE_URL}?${params.toString()}`;
@@ -372,13 +372,22 @@ function formatarTelefoneRaw(numero, codigoPais = '55', ddd = null) {
             return `+${codigoPais}${numLimpo}`;
         }
         // Se o número não tem DDD, adiciona o DDD inferido e o código do país
-        if (numLimpo.length === 8 || numLimpo.length === 9) {
+        if (numLimpo.length === 8) { // 8 dígitos (telefone fixo ou antigo)
+            // Adiciona o '9' após o DDD
+            return `+${codigoPais}${dddLimpo}9${numLimpo}`;
+        } else if (numLimpo.length === 9) { // 9 dígitos (celular com 9º dígito)
             return `+${codigoPais}${dddLimpo}${numLimpo}`;
         }
     }
 
     // Tenta inferir o DDD a partir do tamanho do número (se for 10 ou 11 dígitos)
-    if (numLimpo.length === 10 || numLimpo.length === 11) {
+    if (numLimpo.length === 10) { // DDD + 8 dígitos
+        // Adiciona o '9' após o DDD
+        const ddd = numLimpo.substring(0, 2);
+        const numeroSemDDD = numLimpo.substring(2);
+        const novoNumero = `${ddd}9${numeroSemDDD}`;
+        return `+${codigoPais}${novoNumero}`;
+    } else if (numLimpo.length === 11) { // DDD + 9 dígitos
         return `+${codigoPais}${numLimpo}`;
     }
 
