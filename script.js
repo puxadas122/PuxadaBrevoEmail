@@ -486,17 +486,29 @@ function exportEmails() {
     alert(`Exportação de emails concluída! ${emails.length} email(s) exportado(s) para "emails_mei_export.txt".`);
 }
 
-// Função para exportar telefones
-function exportPhones() {
+// Função para exportar teleffunction exportPhones() {
     if (allResults.length === 0) {
         alert('Nenhum resultado para exportar.');
         return;
     }
 
-    const phones = allResults
-        .map(empresa => extractPhone(empresa))
-        .filter(phone => phone !== 'N/A');
+    // 1. FILTRAGEM: Aplica o filtro de Razão Social padrão para MEIs
+    const filteredResults = allResults.filter(empresa => {
+        const razaoSocial = empresa.company?.name || '';
+        // O padrão de razão social para MEIs (e EIs) é o CNPJ base (XX.XXX.XXX) seguido pelo nome.
+        // A regex verifica se a razão social começa com 8 dígitos formatados (XX.XXX.XXX) seguidos por um espaço.
+        const regex = /^\d{2}\.\d{3}\.\d{3}\s+/;
+        return regex.test(razaoSocial);
+    });
 
+    if (filteredResults.length === 0) {
+        alert('Nenhum resultado encontrado após a filtragem de Razão Social padrão para MEIs.');
+        return;
+    }
+
+    const phones = filteredResults.map(empresa => {
+        return extractPhone(empresa);
+    }).filter(phone => phone !== 'N/A');
     if (phones.length === 0) {
         alert('Nenhum telefone válido encontrado para exportar.');
         return;
